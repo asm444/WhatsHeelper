@@ -1,0 +1,83 @@
+{
+  "name": "Amaral AllSuport - Resposta do Atendente",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agent-response",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "agent-webhook",
+      "name": "Webhook Resposta Agente",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "d5b36d55-77f7-4047-adeb-52d6d19c0cfe"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://amaral-chat-simulator:3001/api/sendText",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"chatId\": \"{{ $json.body.chatId }}\",\n  \"text\": \"[Atendente] {{ $json.body.text }}\",\n  \"session\": \"default\"\n}",
+        "options": {}
+      },
+      "id": "send-to-waha",
+      "name": "Enviar via WAHA/Simulador",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={\"status\": \"sent\"}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "respond-sent",
+      "name": "Responder Enviado",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [690, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Resposta Agente": {
+      "main": [
+        [
+          {
+            "node": "Enviar via WAHA/Simulador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar via WAHA/Simulador": {
+      "main": [
+        [
+          {
+            "node": "Responder Enviado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "name": "chatbot"
+    },
+    {
+      "name": "amaral-allsuport"
+    }
+  ]
+}

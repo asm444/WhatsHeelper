@@ -1,0 +1,142 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: amaral-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-amaral}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-amaral_secret_2024}
+      POSTGRES_DB: ${POSTGRES_DB:-amaral_suport}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./services/business-engine/src/db/init.sql:/docker-entrypoint-initdb.d/01-init.sql:z
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-amaral}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - amaral-net
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: amaral-n8n
+    environment:
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=${POSTGRES_DB:-amaral_suport}
+      - DB_POSTGRESDB_USER=${POSTGRES_USER:-amaral}
+      - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD:-amaral_secret_2024}
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER:-admin}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD:-admin123}
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY:-change-me-to-random-string}
+      - WEBHOOK_URL=http://n8n:5678/
+      - N8N_HOST=0.0.0.0
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+    ports:
+      - "${N8N_PORT:-5678}:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n/workflows:/home/node/workflows:z
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - amaral-net
+
+  waha:
+    image: devlikeapro/waha
+    container_name: amaral-waha
+    environment:
+      - WHATSAPP_DEFAULT_ENGINE=WEBJS
+      - WAHA_PRINT_QR=true
+      - WHATSAPP_RESTART_ALL_SESSIONS=true
+    ports:
+      - "${WAHA_PORT:-3000}:3000"
+    networks:
+      - amaral-net
+
+  business-engine:
+    build:
+      context: ./services/business-engine
+      dockerfile: Dockerfile
+    container_name: amaral-business-engine
+    environment:
+      - NODE_ENV=production
+      - PORT=${BUSINESS_ENGINE_PORT:-3002}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-amaral}:${POSTGRES_PASSWORD:-amaral_secret_2024}@postgres:5432/${POSTGRES_DB:-amaral_suport}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.0-flash}
+      - CONFIDENCE_THRESHOLD=${CONFIDENCE_THRESHOLD:-0.4}
+      - MAX_RETRIES_BEFORE_ESCALATION=${MAX_RETRIES_BEFORE_ESCALATION:-3}
+      - DASHBOARD_API_URL=http://dashboard-api:3003
+    ports:
+      - "${BUSINESS_ENGINE_PORT:-3002}:3002"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - amaral-net
+
+  chat-simulator:
+    build:
+      context: ./services/chat-simulator
+      dockerfile: Dockerfile
+    container_name: amaral-chat-simulator
+    environment:
+      - NODE_ENV=production
+      - PORT=${CHAT_SIMULATOR_PORT:-3001}
+      - N8N_WEBHOOK_URL=http://amaral-n8n:5678/webhook/waha
+      - BUSINESS_ENGINE_URL=http://business-engine:3002
+    ports:
+      - "${CHAT_SIMULATOR_PORT:-3001}:3001"
+    networks:
+      - amaral-net
+
+  dashboard-api:
+    build:
+      context: ./services/dashboard-api
+      dockerfile: Dockerfile
+    container_name: amaral-dashboard-api
+    environment:
+      - NODE_ENV=production
+      - PORT=${DASHBOARD_API_PORT:-3003}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-amaral}:${POSTGRES_PASSWORD:-amaral_secret_2024}@postgres:5432/${POSTGRES_DB:-amaral_suport}
+      - CHAT_SIMULATOR_URL=http://chat-simulator:3001
+      - WAHA_URL=http://waha:3000
+      - N8N_AGENT_RESPONSE_URL=http://n8n:5678/webhook/agent-response
+    ports:
+      - "${DASHBOARD_API_PORT:-3003}:3003"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - amaral-net
+
+  agent-dashboard:
+    build:
+      context: ./services/agent-dashboard
+      dockerfile: Dockerfile
+    container_name: amaral-agent-dashboard
+    environment:
+      - VITE_DASHBOARD_API_URL=http://localhost:3003
+      - VITE_WS_URL=ws://localhost:3003
+    ports:
+      - "${DASHBOARD_FRONTEND_PORT:-3004}:3004"
+    depends_on:
+      - dashboard-api
+    networks:
+      - amaral-net
+
+volumes:
+  postgres_data:
+  n8n_data:
+
+networks:
+  amaral-net:
+    driver: bridge

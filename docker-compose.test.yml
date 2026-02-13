@@ -1,0 +1,24 @@
+# Compose para testes de integração (sem WAHA/n8n, com PostgreSQL)
+services:
+  postgres-test:
+    image: postgres:16-alpine
+    container_name: amaral-postgres-test
+    environment:
+      POSTGRES_USER: amaral_test
+      POSTGRES_PASSWORD: test_secret
+      POSTGRES_DB: amaral_test
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./services/business-engine/src/db/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U amaral_test"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+    networks:
+      - amaral-test-net
+
+networks:
+  amaral-test-net:
+    driver: bridge

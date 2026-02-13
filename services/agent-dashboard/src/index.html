@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Amaral AllSuport - Painel do Atendente</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <!-- Primary Sidebar (Chatwoot-style icon nav) -->
+  <nav class="primary-sidebar">
+    <div class="sidebar-top">
+      <div class="sidebar-logo" title="Amaral AllSuport">
+        <svg width="26" height="26" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="8" fill="#1F93FF"/>
+          <path d="M8 16l4 4 8-8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="sidebar-nav">
+        <a class="sidebar-nav-item active" title="Conversas" href="javascript:void(0)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+          </svg>
+        </a>
+        <a class="sidebar-nav-item" title="Contatos" href="javascript:void(0)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+          </svg>
+        </a>
+        <a class="sidebar-nav-item" title="Relatórios" href="javascript:void(0)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+        </a>
+        <a class="sidebar-nav-item" title="Configurações" href="javascript:void(0)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="sidebar-nav-item connection-indicator" id="connectionStatus" title="Status da conexão">
+        <span class="status-dot disconnected"></span>
+        <span class="status-text sr-only">Desconectado</span>
+      </div>
+      <div class="sidebar-nav-item" id="notificationBell" title="Notificações">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        <span class="notification-badge hidden" id="notificationBadge">0</span>
+      </div>
+      <div class="sidebar-nav-item sidebar-avatar-item">
+        <span class="agent-avatar">A</span>
+        <span class="agent-name sr-only">Atendente</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="main-layout">
+    <!-- Left Panel: Conversation List -->
+    <aside class="panel panel-left" id="panelLeft">
+      <div class="panel-header">
+        <h2>Conversas</h2>
+        <span class="ticket-count" id="ticketCount">0</span>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters">
+        <div class="filter-group">
+          <select id="filterStatus" class="filter-select" aria-label="Filtrar por status">
+            <option value="">Todos os status</option>
+            <option value="open">Aberto</option>
+            <option value="assigned">Atribuído</option>
+            <option value="in_progress">Em andamento</option>
+            <option value="resolved">Resolvido</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <select id="filterPriority" class="filter-select" aria-label="Filtrar por prioridade">
+            <option value="">Todas as prioridades</option>
+            <option value="critical">Crítica</option>
+            <option value="high">Alta</option>
+            <option value="medium">Média</option>
+            <option value="low">Baixa</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Ticket List -->
+      <div class="ticket-list" id="ticketList">
+        <div class="empty-state" id="emptyState">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+          </svg>
+          <p>Nenhuma conversa</p>
+          <span class="empty-hint">Novas conversas aparecerão aqui automaticamente</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Center Panel: Conversation Detail -->
+    <section class="panel panel-center" id="panelCenter">
+      <div class="no-ticket-selected" id="noTicketSelected">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+        </svg>
+        <h3>Conversa não selecionada</h3>
+        <p>Selecione uma conversa no painel lateral para visualizar os detalhes.</p>
+      </div>
+
+      <div class="ticket-detail hidden" id="ticketDetail">
+        <!-- Conversation Header Bar -->
+        <div class="detail-header">
+          <div class="detail-header-top">
+            <div class="detail-title-group">
+              <h2 class="detail-ticket-id" id="detailTicketId">#---</h2>
+              <span class="detail-category badge" id="detailCategory">-</span>
+              <span class="detail-priority badge" id="detailPriority">-</span>
+              <span class="detail-status badge" id="detailStatus">-</span>
+            </div>
+            <div class="detail-actions">
+              <select id="statusSelect" class="status-select" aria-label="Alterar status">
+                <option value="open">Aberto</option>
+                <option value="assigned">Atribuído</option>
+                <option value="in_progress">Em andamento</option>
+                <option value="resolved">Resolvido</option>
+                <option value="closed">Fechado</option>
+              </select>
+              <button class="btn btn-sm btn-resolve" id="btnUpdateStatus">Atualizar Status</button>
+            </div>
+          </div>
+          <div class="detail-meta">
+            <div class="meta-item">
+              <span class="meta-label">Cliente:</span>
+              <span class="meta-value" id="detailCustomer">-</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Criado em:</span>
+              <span class="meta-value" id="detailCreatedAt">-</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">SLA:</span>
+              <span class="meta-value sla-countdown" id="detailSLA">-</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Motivo:</span>
+              <span class="meta-value" id="detailReason">-</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="detail-summary" id="detailSummary">
+          <h3>Resumo</h3>
+          <p id="detailSummaryText">-</p>
+          <div class="key-points" id="detailKeyPoints"></div>
+        </div>
+
+        <!-- Conversation -->
+        <div class="conversation" id="conversation">
+          <h3>Mensagens</h3>
+          <div class="message-list" id="messageList">
+            <div class="empty-messages">
+              <p>Nenhuma mensagem ainda.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Panel: Actions & Reply -->
+    <aside class="panel panel-right" id="panelRight">
+      <div class="panel-header">
+        <h2>Responder</h2>
+      </div>
+
+      <div class="composer-container">
+        <div class="composer-disabled" id="composerDisabled">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+          <p>Selecione uma conversa para responder</p>
+        </div>
+
+        <div class="composer hidden" id="composer">
+          <div class="quick-responses">
+            <h4>Respostas Rápidas</h4>
+            <div class="quick-response-list" id="quickResponseList">
+              <button class="quick-response-btn" data-text="Olá! Sou o atendente responsável pelo seu chamado. Como posso ajudá-lo?">
+                Saudação
+              </button>
+              <button class="quick-response-btn" data-text="Estou analisando seu caso e retorno em breve com uma solução.">
+                Analisando
+              </button>
+              <button class="quick-response-btn" data-text="Seu problema foi resolvido. Posso ajudar com mais alguma coisa?">
+                Resolvido
+              </button>
+              <button class="quick-response-btn" data-text="Vou precisar de mais informações para resolver seu problema. Poderia detalhar melhor?">
+                Mais info
+              </button>
+              <button class="quick-response-btn" data-text="Estou encaminhando seu caso para o setor responsável. Eles entrarão em contato em breve.">
+                Encaminhar
+              </button>
+            </div>
+          </div>
+
+          <div class="composer-input-area">
+            <label for="messageInput" class="sr-only">Mensagem para o cliente</label>
+            <textarea
+              id="messageInput"
+              class="message-textarea"
+              placeholder="Escreva uma resposta..."
+              rows="5"
+            ></textarea>
+            <div class="composer-footer">
+              <span class="char-count" id="charCount">0 caracteres</span>
+              <div class="composer-buttons">
+                <button class="btn btn-ghost" id="btnClear" type="button">Limpar</button>
+                <button class="btn btn-send" id="btnSend" type="button">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="22" y1="2" x2="11" y2="13"/>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                  </svg>
+                  Enviar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Mobile toggle -->
+  <button class="mobile-toggle" id="mobileToggle" aria-label="Alternar painéis">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="3" y1="12" x2="21" y2="12"/>
+      <line x1="3" y1="6" x2="21" y2="6"/>
+      <line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+
+  <script type="module" src="/main.js"></script>
+</body>
+</html>
