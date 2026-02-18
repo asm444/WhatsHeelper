@@ -20,7 +20,9 @@ services:
       - amaral-net
 
   n8n:
-    image: n8nio/n8n:latest
+    build:
+      context: ./services/n8n
+      dockerfile: Dockerfile
     container_name: amaral-n8n
     environment:
       - DB_TYPE=postgresdb
@@ -91,7 +93,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=${CHAT_SIMULATOR_PORT:-3001}
-      - N8N_WEBHOOK_URL=http://amaral-n8n:5678/webhook/waha
+      - N8N_WEBHOOK_URL=http://n8n:5678/webhook/waha
       - BUSINESS_ENGINE_URL=http://business-engine:3002
     ports:
       - "${CHAT_SIMULATOR_PORT:-3001}:3001"

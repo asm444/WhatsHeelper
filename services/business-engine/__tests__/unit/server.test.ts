@@ -7,6 +7,8 @@ jest.mock('../../src/ai/gemini-client', () => ({
     category: 'hardware',
     confidence: 0.85,
     reasoning: 'Problema com computador identificado',
+    suggestedPriority: 'medium',
+    severityReason: 'Problema isolado sem impacto em múltiplos usuários',
   }),
   generateResponse: jest.fn().mockResolvedValue({
     response: 'Tente reiniciar o computador',
@@ -19,6 +21,9 @@ jest.mock('../../src/ai/gemini-client', () => ({
     category: 'hardware',
     priority: 'medium',
     keyPoints: ['Computador não liga'],
+    severityReason: 'Funcionalidade comprometida mas há alternativa',
+    riskFactors: [],
+    escalationContext: 'Cliente tentou reiniciar sem sucesso',
   }),
 }));
 
@@ -68,6 +73,45 @@ describe('Business Engine API', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.keywordMatch).toBeDefined();
+    });
+
+    it('deve ativar bypass com frase-chave', async () => {
+      const res = await request(app)
+        .post('/classify')
+        .send({ message: 'atendente sender', phone: '5511999999999' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.bypassActivated).toBe(true);
+      expect(res.body.escalation.shouldEscalate).toBe(true);
+      expect(res.body.escalation.priority).toBe('low');
+      expect(res.body.confidence).toBe(1.0);
+    });
+
+    it('frase-chave deve ser case-insensitive', async () => {
+      const res = await request(app)
+        .post('/classify')
+        .send({ message: 'ATENDENTE SENDER', phone: '5511999999999' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.bypassActivated).toBe(true);
+    });
+
+    it('frase-chave deve ignorar espaços', async () => {
+      const res = await request(app)
+        .post('/classify')
+        .send({ message: '  atendente sender  ', phone: '5511999999999' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.bypassActivated).toBe(true);
+    });
+
+    it('não deve ativar bypass com frase parcial', async () => {
+      const res = await request(app)
+        .post('/classify')
+        .send({ message: 'atendente sender extra', phone: '5511999999999' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.bypassActivated).toBeUndefined();
     });
   });
 

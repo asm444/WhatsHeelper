@@ -4,6 +4,12 @@ export interface EscalationResult {
   priority: 'critical' | 'high' | 'medium' | 'low';
 }
 
+const BYPASS_PHRASE = (process.env.BYPASS_PHRASE || 'atendente sender').toLowerCase();
+
+export function isBypassPhrase(message: string): boolean {
+  return message.trim().toLowerCase() === BYPASS_PHRASE;
+}
+
 const HUMAN_REQUEST_PATTERNS = [
   'atendente', 'humano', 'pessoa', 'falar com alguém', 'falar com alguem',
   'pessoa real', 'agente', 'supervisor', 'gerente', 'reclamação', 'reclamacao',

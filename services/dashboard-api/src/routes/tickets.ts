@@ -22,6 +22,9 @@ export interface Ticket {
   slaDeadline: string | null;
   createdAt: string;
   updatedAt: string;
+  severityReason: string | null;
+  riskFactors: string[];
+  escalationContext: string | null;
 }
 
 export interface TicketMessage {
@@ -43,6 +46,8 @@ export const inMemoryMessages: Map<string, TicketMessage[]> = new Map();
 // ---------------------------------------------------------------------------
 
 function ticketFromRow(row: any): Ticket {
+  const metadata = typeof row.metadata === 'string' ? JSON.parse(row.metadata || '{}') : (row.metadata ?? {});
+
   return {
     id: row.id,
     conversationId: row.conversation_id ?? null,
@@ -58,6 +63,9 @@ function ticketFromRow(row: any): Ticket {
     slaDeadline: row.sla_deadline ? new Date(row.sla_deadline).toISOString() : null,
     createdAt: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString(),
     updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : new Date().toISOString(),
+    severityReason: metadata.severityReason ?? null,
+    riskFactors: metadata.riskFactors ?? [],
+    escalationContext: metadata.escalationContext ?? null,
   };
 }
 
@@ -187,6 +195,9 @@ router.post('/', async (req: Request, res: Response) => {
       escalationReason = null,
       assignedTo = null,
       slaDeadline = null,
+      severityReason = null,
+      riskFactors = [],
+      escalationContext = null,
     } = req.body;
 
     if (!phone || !category) {
@@ -197,11 +208,17 @@ router.post('/', async (req: Request, res: Response) => {
     let ticketId = uuidv4();
 
     try {
+      const metadata = JSON.stringify({
+        severityReason,
+        riskFactors,
+        escalationContext,
+      });
+
       const result = await pool.query(
-        `INSERT INTO tickets (conversation_id, customer_id, category, summary, key_points, priority, status, escalation_reason, assigned_to, sla_deadline)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        `INSERT INTO tickets (conversation_id, customer_id, category, summary, key_points, priority, status, escalation_reason, assigned_to, sla_deadline, metadata)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
          RETURNING *`,
-        [conversationId, customerId, category, summary, JSON.stringify(keyPoints), priority, status, escalationReason, assignedTo, slaDeadline],
+        [conversationId, customerId, category, summary, JSON.stringify(keyPoints), priority, status, escalationReason, assignedTo, slaDeadline, metadata],
       );
 
       const row = result.rows[0];
@@ -226,6 +243,9 @@ router.post('/', async (req: Request, res: Response) => {
         slaDeadline,
         createdAt: now,
         updatedAt: now,
+        severityReason,
+        riskFactors,
+        escalationContext,
       };
 
       inMemoryTickets.set(ticketId, ticket);
@@ -415,6 +435,17 @@ router.post('/:id/messages', async (req: Request, res: Response) => {
 
       // Encaminha ao cliente se for mensagem do atendente
       if (sender === 'agent') {
+        // Atualiza status para in_progress quando atendente responde pela primeira vez
+        // Isso desativa a IA automaticamente e mantém apenas atendente conversando
+        await pool.query(
+          `UPDATE tickets
+           SET status = 'in_progress', updated_at = NOW()
+           WHERE id = $1 AND status = 'assigned'`,
+          [id],
+        ).catch(() => {
+          // Se falhar, continua (melhor enviar mensagem que falhar completamente)
+        });
+
         void forwardAgentMessageToClient(id, content);
       }
 

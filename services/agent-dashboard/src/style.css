@@ -1298,3 +1298,16 @@ body {
     flex-direction: column;
   }
 }
+
+/* --- Risk Factors List --- */
+.risk-list {
+  margin: 0;
+  padding-left: 1rem;
+  font-size: 0.875rem;
+  color: var(--cw-text-secondary);
+}
+
+.risk-list li {
+  margin-bottom: 0.25rem;
+  list-style-type: disc;
+}

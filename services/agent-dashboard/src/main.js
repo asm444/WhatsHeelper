@@ -32,10 +32,10 @@ const state = {
 
 // --- Priority / Status maps (PT-BR) ---
 const PRIORITY_LABELS = {
-  critical: 'Crítica',
-  high: 'Alta',
-  medium: 'Média',
-  low: 'Baixa',
+  critical: 'Critico',
+  high: 'Alto',
+  medium: 'Medio',
+  low: 'Baixo',
 };
 
 const PRIORITY_ORDER = { critical: 0, high: 1, medium: 2, low: 3 };
@@ -87,6 +87,10 @@ function cacheDom() {
   dom.detailReason = document.getElementById('detailReason');
   dom.detailSummaryText = document.getElementById('detailSummaryText');
   dom.detailKeyPoints = document.getElementById('detailKeyPoints');
+  dom.detailSeverityReason = document.getElementById('detailSeverityReason');
+  dom.detailRiskFactors = document.getElementById('detailRiskFactors');
+  dom.detailRiskFactorsEmpty = document.getElementById('detailRiskFactorsEmpty');
+  dom.detailEscalationContext = document.getElementById('detailEscalationContext');
   dom.messageList = document.getElementById('messageList');
   dom.statusSelect = document.getElementById('statusSelect');
   dom.btnUpdateStatus = document.getElementById('btnUpdateStatus');
@@ -456,6 +460,30 @@ function renderTicketDetail(ticket, messages) {
       dom.detailKeyPoints.appendChild(span);
     });
   }
+
+  // Severity reason
+  const severityReason = ticket.severityReason || ticket.severity_reason;
+  dom.detailSeverityReason.textContent = severityReason || '-';
+
+  // Risk factors
+  const riskFactors = ticket.riskFactors || ticket.risk_factors || [];
+  dom.detailRiskFactors.innerHTML = '';
+  if (Array.isArray(riskFactors) && riskFactors.length > 0) {
+    riskFactors.forEach((factor) => {
+      const li = document.createElement('li');
+      li.textContent = factor;
+      dom.detailRiskFactors.appendChild(li);
+    });
+    dom.detailRiskFactors.style.display = 'block';
+    dom.detailRiskFactorsEmpty.style.display = 'none';
+  } else {
+    dom.detailRiskFactors.style.display = 'none';
+    dom.detailRiskFactorsEmpty.style.display = 'inline';
+  }
+
+  // Escalation context
+  const escalationContext = ticket.escalationContext || ticket.escalation_context;
+  dom.detailEscalationContext.textContent = escalationContext || '-';
 
   // Status selector
   dom.statusSelect.value = status;

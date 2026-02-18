@@ -1,4 +1,4 @@
-import { checkEscalation, calculateSLADeadline } from '../../src/rules/escalation';
+import { checkEscalation, calculateSLADeadline, isBypassPhrase } from '../../src/rules/escalation';
 
 describe('Escalation Rules', () => {
   describe('checkEscalation', () => {
@@ -91,6 +91,36 @@ describe('Escalation Rules', () => {
       const expected = before + 24 * 60 * 60 * 1000;
       expect(deadline.getTime()).toBeGreaterThanOrEqual(expected - 1000);
       expect(deadline.getTime()).toBeLessThanOrEqual(expected + 1000);
+    });
+  });
+
+  describe('isBypassPhrase', () => {
+    it('deve reconhecer frase de bypass (match exato)', () => {
+      expect(isBypassPhrase('atendente sender')).toBe(true);
+    });
+
+    it('deve ser case-insensitive', () => {
+      expect(isBypassPhrase('ATENDENTE SENDER')).toBe(true);
+      expect(isBypassPhrase('Atendente Sender')).toBe(true);
+      expect(isBypassPhrase('AtEnDeNtE sEnDeR')).toBe(true);
+    });
+
+    it('deve ignorar espaços nas bordas', () => {
+      expect(isBypassPhrase('  atendente sender  ')).toBe(true);
+      expect(isBypassPhrase('\tatendente sender\n')).toBe(true);
+    });
+
+    it('deve rejeitar frases parciais', () => {
+      expect(isBypassPhrase('atendente')).toBe(false);
+      expect(isBypassPhrase('sender')).toBe(false);
+      expect(isBypassPhrase('atendente sender extra')).toBe(false);
+      expect(isBypassPhrase('prefix atendente sender')).toBe(false);
+    });
+
+    it('deve rejeitar mensagens diferentes', () => {
+      expect(isBypassPhrase('falar com atendente')).toBe(false);
+      expect(isBypassPhrase('quero um atendente')).toBe(false);
+      expect(isBypassPhrase('')).toBe(false);
     });
   });
 });

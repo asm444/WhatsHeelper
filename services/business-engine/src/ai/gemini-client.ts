@@ -17,6 +17,7 @@ Regras:
 - Nunca invente informações técnicas
 - Se o problema parece urgente ou sensível, recomende atendimento humano
 - Respostas devem ter no máximo 500 caracteres
+- Nunca use emojis nas respostas
 
 Categorias disponíveis:
 ${CATEGORIES.map(c => `- ${c.id}: ${c.description}`).join('\n')}`;
@@ -25,6 +26,8 @@ export interface ClassificationResult {
   category: string;
   confidence: number;
   reasoning: string;
+  suggestedPriority: 'critical' | 'high' | 'medium' | 'low';
+  severityReason: string;
 }
 
 export interface ResponseResult {
@@ -39,6 +42,9 @@ export interface SummaryResult {
   category: string;
   priority: string;
   keyPoints: string[];
+  severityReason: string;
+  riskFactors: string[];
+  escalationContext: string;
 }
 
 let genAI: GoogleGenerativeAI | null = null;
@@ -65,10 +71,18 @@ export async function classifyMessage(message: string, conversationHistory: stri
   const prompt = `${SYSTEM_PROMPT}
 
 Analise a mensagem do cliente e classifique em uma das categorias.
-Responda APENAS em JSON no formato:
-{"category": "id_da_categoria", "confidence": 0.0-1.0, "reasoning": "motivo da classificação"}
+Alem da classificacao, avalie a severidade tecnica do problema.
 
-Histórico da conversa:
+Criterios de prioridade:
+- critical: sistema totalmente parado, perda financeira ativa, exposicao de dados, acesso nao autorizado
+- high: impacto em producao, multiplos usuarios afetados, prazo critico em risco, degradacao grave
+- medium: funcionalidade comprometida mas ha alternativa, problema recorrente
+- low: duvida, curiosidade, solicitacao de informacao, problema estetico
+
+Responda APENAS em JSON no formato:
+{"category": "id_da_categoria", "confidence": 0.0-1.0, "reasoning": "motivo da classificacao", "suggestedPriority": "low|medium|high|critical", "severityReason": "frase curta justificando a prioridade"}
+
+Historico da conversa:
 ${conversationHistory.length > 0 ? conversationHistory.join('\n') : '(primeira mensagem)'}
 
 Mensagem do cliente: "${message}"`;
@@ -79,12 +93,21 @@ Mensagem do cliente: "${message}"`;
   try {
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error('JSON não encontrado na resposta');
-    return JSON.parse(jsonMatch[0]) as ClassificationResult;
+    const parsed = JSON.parse(jsonMatch[0]) as ClassificationResult;
+
+    // Sanitiza priority contra valores inválidos
+    const VALID_PRIORITIES = ['critical', 'high', 'medium', 'low'] as const;
+    const raw = parsed.suggestedPriority?.toLowerCase();
+    parsed.suggestedPriority = VALID_PRIORITIES.includes(raw as any) ? (raw as typeof VALID_PRIORITIES[number]) : 'medium';
+
+    return parsed;
   } catch {
     return {
       category: 'software',
       confidence: 0.3,
       reasoning: 'Não foi possível classificar com precisão',
+      suggestedPriority: 'medium',
+      severityReason: 'Não foi possível avaliar a severidade',
     };
   }
 }
@@ -131,14 +154,33 @@ Mensagem do cliente: "${message}"`;
 export async function generateSummary(
   messages: string[],
   category: string,
+  escalationReason?: string,
+  severityReason?: string,
 ): Promise<SummaryResult> {
   const model = getModel();
 
   const prompt = `${SYSTEM_PROMPT}
 
 Gere um resumo da conversa para o atendente humano.
+O atendente precisa entender o nivel de urgencia e os riscos envolvidos.
+
+${escalationReason ? `Motivo da escalacao: ${escalationReason}` : ''}
+${severityReason ? `Severidade identificada na classificacao: ${severityReason}` : ''}
+
 Responda APENAS em JSON no formato:
-{"summary": "resumo da conversa", "category": "${category}", "priority": "low|medium|high|critical", "keyPoints": ["ponto 1", "ponto 2"]}
+{
+  "summary": "resumo em 2-3 frases",
+  "category": "${category}",
+  "priority": "low|medium|high|critical",
+  "keyPoints": ["ponto 1", "ponto 2"],
+  "severityReason": "justificativa da prioridade",
+  "riskFactors": ["fator de risco 1", "fator de risco 2"],
+  "escalationContext": "frase curta explicando por que o bot escalou"
+}
+
+Notas:
+- riskFactors: lista vazia se nao ha fatores de risco relevantes
+- escalationContext: ex. "Sistema parado impede operacao do cliente. Bot nao conseguiu resolver apos 3 tentativas."
 
 Mensagens da conversa:
 ${messages.join('\n')}`;
@@ -156,6 +198,9 @@ ${messages.join('\n')}`;
       category,
       priority: 'medium',
       keyPoints: ['Resumo automático falhou', 'Verificar histórico manualmente'],
+      severityReason: 'Não foi possível avaliar a severidade',
+      riskFactors: [],
+      escalationContext: 'Escalação automática. Resumo indisponível.',
     };
   }
 }

@@ -8,7 +8,7 @@ const router = Router();
 
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const { phone, category, messages = [], reason, priority = 'medium' } = req.body;
+    const { phone, category, messages = [], reason, priority = 'medium', suggestedPriority, severityReason } = req.body;
 
     if (!phone || !category) {
       return res.status(400).json({ error: 'Campos "phone" e "category" são obrigatórios' });
@@ -17,17 +17,21 @@ router.post('/', async (req: Request, res: Response) => {
     // Gera resumo com IA
     let summary;
     try {
-      summary = await generateSummary(messages, category);
+      summary = await generateSummary(messages, category, reason, severityReason);
     } catch {
       summary = {
         summary: `Cliente (${phone}) precisa de ajuda com ${category}. Motivo da escalação: ${reason || 'não especificado'}`,
         category,
         priority,
         keyPoints: ['Resumo automático indisponível'],
+        severityReason: severityReason || 'Não foi possível avaliar a severidade',
+        riskFactors: [],
+        escalationContext: 'Escalação automática.',
       };
     }
 
-    const effectivePriority = summary.priority || priority;
+    // Hierarquia de prioridade: Resumo > Sugestão Gemini > Prioridade inicial
+    const effectivePriority = summary.priority || suggestedPriority || priority;
     const slaDeadline = calculateSLADeadline(effectivePriority);
 
     // Tenta salvar no banco, mas não falha se o banco não estiver disponível
@@ -92,11 +96,17 @@ router.post('/', async (req: Request, res: Response) => {
           [summary.summary, ticketId],
         );
       } else {
+        const metadata = JSON.stringify({
+          severityReason: summary.severityReason,
+          riskFactors: summary.riskFactors,
+          escalationContext: summary.escalationContext,
+        });
+
         const ticketResult = await pool.query(
-          `INSERT INTO tickets (conversation_id, customer_id, category, summary, escalation_reason, priority, sla_deadline)
-           VALUES ($1, $2, $3, $4, $5, $6, $7)
+          `INSERT INTO tickets (conversation_id, customer_id, category, summary, escalation_reason, priority, sla_deadline, metadata)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
            RETURNING id`,
-          [conversationId, customerId, category, summary.summary, reason, effectivePriority, slaDeadline],
+          [conversationId, customerId, category, summary.summary, reason, effectivePriority, slaDeadline, metadata],
         );
         ticketId = ticketResult.rows[0].id;
       }
@@ -117,6 +127,9 @@ router.post('/', async (req: Request, res: Response) => {
       slaDeadline: slaDeadline.toISOString(),
       status: 'open',
       createdAt: new Date().toISOString(),
+      severityReason: summary.severityReason,
+      riskFactors: summary.riskFactors,
+      escalationContext: summary.escalationContext,
     };
 
     // Notifica o dashboard API

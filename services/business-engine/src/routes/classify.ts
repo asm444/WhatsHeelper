@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { classifyMessage } from '../ai/gemini-client';
 import { findCategoryByKeywords } from '../rules/categories';
-import { checkEscalation } from '../rules/escalation';
+import { checkEscalation, isBypassPhrase } from '../rules/escalation';
 import pool from '../db/pool';
 
 const router = Router();
@@ -14,6 +14,22 @@ router.post('/', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Campo "message" é obrigatório' });
     }
 
+    // Verifica frase-chave de bypass (teste)
+    if (isBypassPhrase(message)) {
+      return res.json({
+        category: 'software',
+        confidence: 1.0,
+        reasoning: 'Bypass de teste ativado via frase-chave',
+        escalation: {
+          shouldEscalate: true,
+          reason: 'Bypass de teste: escalacao imediata solicitada pelo cliente',
+          priority: 'low',
+        },
+        keywordMatch: null,
+        bypassActivated: true,
+      });
+    }
+
     // Verifica se já existe um atendente ativo para este telefone
     if (phone) {
       try {
@@ -22,7 +38,7 @@ router.post('/', async (req: Request, res: Response) => {
            FROM tickets t
            JOIN customers c ON t.customer_id = c.id
            WHERE c.phone = $1
-             AND t.status NOT IN ('closed', 'resolved')
+             AND t.status NOT IN ('closed', 'resolved', 'in_progress')
              AND t.assigned_to IS NOT NULL
            ORDER BY t.created_at DESC
            LIMIT 1`,
@@ -84,12 +100,16 @@ router.post('/', async (req: Request, res: Response) => {
           category: keywordResult.category.id,
           confidence: keywordResult.matchScore,
           reasoning: 'Classificação por keywords (Gemini indisponível)',
+          suggestedPriority: 'medium' as const,
+          severityReason: 'Não foi possível avaliar a severidade',
         };
       } else {
         aiResult = {
           category: 'software',
           confidence: 0.2,
           reasoning: 'Classificação padrão (Gemini indisponível, sem match de keywords)',
+          suggestedPriority: 'medium' as const,
+          severityReason: 'Não foi possível avaliar a severidade',
         };
       }
     }
@@ -107,6 +127,8 @@ router.post('/', async (req: Request, res: Response) => {
       category: aiResult.category,
       confidence: aiResult.confidence,
       reasoning: aiResult.reasoning,
+      suggestedPriority: aiResult.suggestedPriority,
+      severityReason: aiResult.severityReason,
       escalation: {
         shouldEscalate: escalation.shouldEscalate,
         reason: escalation.reason,

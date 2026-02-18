@@ -49,6 +49,9 @@ router.post('/', (req: Request, res: Response) => {
         slaDeadline: ticket.slaDeadline ?? null,
         createdAt: ticket.createdAt ?? now,
         updatedAt: now,
+        severityReason: ticket.severityReason ?? null,
+        riskFactors: ticket.riskFactors ?? [],
+        escalationContext: ticket.escalationContext ?? null,
       };
       inMemoryTickets.set(ticket.id, stored);
     }
