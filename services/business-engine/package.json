@@ -1,7 +1,7 @@
 {
   "name": "business-engine",
   "version": "1.0.0",
-  "description": "Motor de regras e IA para o chatbot Amaral AllSuport",
+  "description": "Motor de regras e IA para o chatbot Amaral Support",
   "main": "dist/server.js",
   "scripts": {
     "build": "tsc",

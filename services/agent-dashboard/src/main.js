@@ -1,5 +1,5 @@
 // ===================================================================
-// Amaral AllSuport - Painel do Atendente
+// Amaral Support - Painel do Atendente
 // Main JavaScript (Vanilla)
 // ===================================================================
 

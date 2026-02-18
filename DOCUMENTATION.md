@@ -1,8 +1,8 @@
-# Documentação Completa: WhatsApp ChatBot - Amaral AllSuport
+# Documentação Completa: WhatsApp ChatBot - Amaral Support
 
 ## Contexto
 
-Este documento fornece uma visão completa da arquitetura, tecnologias, configurações e fluxos de dados do sistema de chatbot de suporte ao cliente via WhatsApp para a empresa fictícia "Amaral AllSuport". O sistema resolve problemas comuns automaticamente usando IA (Google Gemini) e escala para atendentes humanos quando necessário.
+Este documento fornece uma visão completa da arquitetura, tecnologias, configurações e fluxos de dados do sistema de chatbot de suporte ao cliente via WhatsApp para a empresa fictícia "Amaral Support". O sistema resolve problemas comuns automaticamente usando IA (Google Gemini) e escala para atendentes humanos quando necessário.
 
 ---
 
@@ -1036,7 +1036,7 @@ export async function classifyMessage(
   conversationHistory: string[]
 ): Promise<ClassificationResult> {
   const prompt = `
-Você é um assistente de suporte técnico da empresa Amaral AllSuport.
+Você é um assistente de suporte técnico da empresa Amaral Support.
 
 Categorias disponíveis:
 - hardware: Problemas com equipamentos físicos (computador, impressora, periféricos)

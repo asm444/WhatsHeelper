@@ -1,4 +1,4 @@
-# API Reference - Amaral AllSuport
+# API Reference - Amaral Support
 
 ## Business Engine (porta 3002)
 

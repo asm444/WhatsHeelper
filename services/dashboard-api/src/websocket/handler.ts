@@ -40,7 +40,7 @@ export function broadcastToClients(
 export function handleConnection(ws: WebSocket): void {
   const welcome: WsMessage = {
     event: 'connection.established',
-    data: { message: 'Conectado ao Dashboard API - Amaral AllSuport' },
+    data: { message: 'Conectado ao Dashboard API - Amaral Support' },
     timestamp: new Date().toISOString(),
   };
 

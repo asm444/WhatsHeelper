@@ -1,7 +1,7 @@
 {
   "name": "e2e-tests",
   "version": "1.0.0",
-  "description": "Testes end-to-end - Amaral AllSuport",
+  "description": "Testes end-to-end - Amaral Support",
   "scripts": {
     "test": "jest --runInBand --testTimeout=30000"
   },

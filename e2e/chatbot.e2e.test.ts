@@ -1,5 +1,5 @@
 /**
- * Testes End-to-End - Amaral AllSuport
+ * Testes End-to-End - Amaral Support
  *
  * Pré-requisitos: todos os serviços rodando (make up)
  * Execute: cd e2e && npm test

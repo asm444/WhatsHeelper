@@ -1,7 +1,7 @@
-# WhatsApp ChatBot - Amaral AllSuport
+# WhatsApp ChatBot - Amaral Support
 
 ## Projeto
-Chatbot de suporte ao cliente via WhatsApp para "Amaral AllSuport".
+Chatbot de suporte ao cliente via WhatsApp para "Amaral Support".
 O bot resolve problemas comuns automaticamente; quando não consegue, escala para atendente humano via dashboard web.
 
 ## Stack

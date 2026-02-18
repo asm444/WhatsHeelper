@@ -130,7 +130,7 @@ export function createWebhookRouter(
         },
         me: {
           id: 'server@c.us',
-          pushName: 'Amaral AllSuport Bot',
+          pushName: 'Amaral Support Bot',
         },
       },
     ]);
@@ -145,7 +145,7 @@ export function createWebhookRouter(
     console.log(`[Webhook] GET /api/sessions/${session}/me (simulado)`);
     return res.json({
       id: 'server@c.us',
-      pushName: 'Amaral AllSuport Bot',
+      pushName: 'Amaral Support Bot',
       session,
       status: 'WORKING',
       engine: 'WEBJS',

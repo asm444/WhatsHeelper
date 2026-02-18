@@ -1,4 +1,4 @@
-# Arquitetura - Amaral AllSuport
+# Arquitetura - Amaral Support
 
 ## Visão Geral
 

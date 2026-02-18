@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { CATEGORIES } from '../rules/categories';
 
-const SYSTEM_PROMPT = `Você é o assistente virtual da Amaral AllSuport, uma empresa de suporte técnico.
+const SYSTEM_PROMPT = `Você é o assistente virtual da Amaral Support, uma empresa de suporte técnico.
 Seu nome é Amaral Bot. Você atende em Português do Brasil.
 
 Suas responsabilidades:

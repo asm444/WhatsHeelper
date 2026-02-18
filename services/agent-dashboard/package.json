@@ -1,7 +1,7 @@
 {
   "name": "agent-dashboard",
   "version": "1.0.0",
-  "description": "Dashboard do atendente - Amaral AllSuport",
+  "description": "Dashboard do atendente - Amaral Support",
   "main": "src/main.js",
   "scripts": {
     "dev": "vite --port 3004",

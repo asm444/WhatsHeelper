@@ -1,7 +1,7 @@
 {
   "name": "whatsapp-chatbot-amaral",
   "version": "1.0.0",
-  "description": "WhatsApp ChatBot - Amaral AllSuport",
+  "description": "WhatsApp ChatBot - Amaral Support",
   "private": true,
   "workspaces": [
     "services/chat-simulator",
