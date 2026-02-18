@@ -12,7 +12,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./services/business-engine/src/db/init.sql:/docker-entrypoint-initdb.d/01-init.sql:z
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-amaral}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-amaral} -d ${POSTGRES_DB:-amaral_suport}"]
       interval: 5s
       timeout: 5s
       retries: 5
