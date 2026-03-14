@@ -1,4 +1,4 @@
--- Schema do banco de dados - Amaral AllSuport
+-- Schema do banco de dados - Amaral Support
 
 CREATE TABLE IF NOT EXISTS customers (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

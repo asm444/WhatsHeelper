@@ -34,8 +34,8 @@ coverage/
 # OS
 Thumbs.db
 
-# Docker
-.dockerignore
+# Docker volumes
+docker-data/
 
 # n8n
 n8n/data/
@@ -48,3 +48,4 @@ n8n/credentials/
 
 # Local development
 .claude/
+CLAUDE.md

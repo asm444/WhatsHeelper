@@ -1,9 +1,9 @@
 #!/bin/bash
-# Setup inicial do projeto - Amaral AllSuport
+# Setup inicial do projeto - Amaral Support
 
 set -e
 
-echo "=== Setup - Amaral AllSuport ==="
+echo "=== Setup - Amaral Support ==="
 
 # Verificar Node.js
 if ! command -v node &> /dev/null; then

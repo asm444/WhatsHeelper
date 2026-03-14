@@ -129,10 +129,10 @@ Abra `.env` no seu editor e configure as variaveis. As obrigatorias estao marcad
 # ===================================================
 POSTGRES_USER=amaral
 POSTGRES_PASSWORD=amaral_secret_2024       # Mude em producao
-POSTGRES_DB=amaral_suport
+POSTGRES_DB=amaral_support
 POSTGRES_HOST=postgres
 POSTGRES_PORT=5432
-DATABASE_URL=postgresql://amaral:amaral_secret_2024@postgres:5432/amaral_suport
+DATABASE_URL=postgresql://amaral:amaral_secret_2024@postgres:5432/amaral_support
 
 # ===================================================
 # n8n - Interface de workflows
@@ -167,7 +167,7 @@ DASHBOARD_FRONTEND_PORT=3004
 # ===================================================
 # Configuracoes do Bot
 # ===================================================
-BOT_NAME=Amaral AllSuport
+BOT_NAME=Amaral Support
 BOT_LANGUAGE=pt-BR
 CONFIDENCE_THRESHOLD=0.4
 MAX_RETRIES_BEFORE_ESCALATION=3
@@ -302,7 +302,7 @@ O n8n precisa ter os workflows importados e ativados para o fluxo de mensagens f
 
 Saida esperada:
 ```
-=== Verificacao de Saude - Amaral AllSuport ===
+=== Verificacao de Saude - Amaral Support ===
 
 [Servicos Customizados]
   [OK] Chat Simulator (3001)

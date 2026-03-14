@@ -90,7 +90,7 @@ A interface se parece com:
 
 ```
 +----------------------------------------------------------+
-|  Amaral AllSuport - Chat Simulator                       |
+|  Amaral Support - Chat Simulator                       |
 +----------------------------------------------------------+
 |  Numero do cliente: [5511999999999        ]              |
 |                                                          |
@@ -231,7 +231,7 @@ A interface mostra a lista de tickets:
 
 ```
 +----------------------------------------------------------+
-|  Amaral AllSuport - Dashboard                            |
+|  Amaral Support - Dashboard                            |
 +----------------------------------------------------------+
 |  Tickets Abertos (1)                                     |
 +----------------------------------------------------------+
@@ -558,7 +558,7 @@ docker compose exec business-engine sh
 docker compose exec business-engine env | grep -E "GEMINI|DATABASE|PORT"
 
 # Ver o banco de dados diretamente
-docker compose exec postgres psql -U amaral -d amaral_suport
+docker compose exec postgres psql -U amaral -d amaral_support
 
 # Queries SQL uteis dentro do psql:
 # \dt                          -- listar tabelas

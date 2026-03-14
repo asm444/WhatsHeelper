@@ -1,4 +1,4 @@
-.PHONY: up down build logs test-unit test-integration test-e2e health clean dev
+.PHONY: up down build logs restart dev install test-unit test-integration test-e2e test health clean
 
 # === Docker ===
 up:
@@ -18,7 +18,7 @@ restart:
 
 # === Desenvolvimento Local ===
 dev:
-	@echo "Iniciando serviços em modo desenvolvimento..."
+	@echo "Iniciando servicos em modo desenvolvimento..."
 	cd services/business-engine && npm run dev &
 	cd services/chat-simulator && npm run dev &
 	cd services/dashboard-api && npm run dev &
@@ -32,7 +32,9 @@ test-unit:
 	npm run test:unit --workspaces --if-present
 
 test-integration:
+	docker compose -f docker-compose.test.yml up -d --wait
 	npm run test:integration --workspaces --if-present
+	docker compose -f docker-compose.test.yml down
 
 test-e2e:
 	cd e2e && npm test
@@ -41,13 +43,13 @@ test: test-unit
 
 # === Health Check ===
 health:
-	@echo "=== Verificando serviços ==="
-	@curl -sf http://localhost:3001/health && echo " ✓ Chat Simulator (3001)" || echo " ✗ Chat Simulator (3001)"
-	@curl -sf http://localhost:3002/health && echo " ✓ Business Engine (3002)" || echo " ✗ Business Engine (3002)"
-	@curl -sf http://localhost:3003/health && echo " ✓ Dashboard API (3003)" || echo " ✗ Dashboard API (3003)"
-	@curl -sf http://localhost:3004/ > /dev/null 2>&1 && echo " ✓ Agent Dashboard (3004)" || echo " ✗ Agent Dashboard (3004)"
-	@curl -sf http://localhost:5678/healthz && echo " ✓ n8n (5678)" || echo " ✗ n8n (5678)"
-	@curl -sf http://localhost:3000/api/health && echo " ✓ WAHA (3000)" || echo " ✗ WAHA (3000)"
+	@echo "=== Amaral Support - Health Check ==="
+	@curl -sf http://localhost:3001/health > /dev/null && echo " [OK] Chat Simulator (3001)" || echo " [FAIL] Chat Simulator (3001)"
+	@curl -sf http://localhost:3002/health > /dev/null && echo " [OK] Business Engine (3002)" || echo " [FAIL] Business Engine (3002)"
+	@curl -sf http://localhost:3003/health > /dev/null && echo " [OK] Dashboard API (3003)" || echo " [FAIL] Dashboard API (3003)"
+	@curl -sf http://localhost:3004/ > /dev/null 2>&1 && echo " [OK] Agent Dashboard (3004)" || echo " [FAIL] Agent Dashboard (3004)"
+	@curl -sf http://localhost:5678/healthz > /dev/null && echo " [OK] n8n (5678)" || echo " [FAIL] n8n (5678)"
+	@curl -sf http://localhost:3000/api/health > /dev/null && echo " [OK] WAHA (3000)" || echo " [FAIL] WAHA (3000)"
 
 # === Limpeza ===
 clean:

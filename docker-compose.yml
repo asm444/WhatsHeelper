@@ -5,14 +5,14 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-amaral}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-amaral_secret_2024}
-      POSTGRES_DB: ${POSTGRES_DB:-amaral_suport}
+      POSTGRES_DB: ${POSTGRES_DB:-amaral_support}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./services/business-engine/src/db/init.sql:/docker-entrypoint-initdb.d/01-init.sql:z
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-amaral} -d ${POSTGRES_DB:-amaral_suport}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-amaral} -d ${POSTGRES_DB:-amaral_support}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -28,7 +28,7 @@ services:
       - DB_TYPE=postgresdb
       - DB_POSTGRESDB_HOST=postgres
       - DB_POSTGRESDB_PORT=5432
-      - DB_POSTGRESDB_DATABASE=${POSTGRES_DB:-amaral_suport}
+      - DB_POSTGRESDB_DATABASE=${POSTGRES_DB:-amaral_support}
       - DB_POSTGRESDB_USER=${POSTGRES_USER:-amaral}
       - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD:-amaral_secret_2024}
       - N8N_BASIC_AUTH_ACTIVE=true
@@ -71,7 +71,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=${BUSINESS_ENGINE_PORT:-3002}
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-amaral}:${POSTGRES_PASSWORD:-amaral_secret_2024}@postgres:5432/${POSTGRES_DB:-amaral_suport}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-amaral}:${POSTGRES_PASSWORD:-amaral_secret_2024}@postgres:5432/${POSTGRES_DB:-amaral_support}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.0-flash}
       - CONFIDENCE_THRESHOLD=${CONFIDENCE_THRESHOLD:-0.4}
@@ -108,7 +108,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=${DASHBOARD_API_PORT:-3003}
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-amaral}:${POSTGRES_PASSWORD:-amaral_secret_2024}@postgres:5432/${POSTGRES_DB:-amaral_suport}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-amaral}:${POSTGRES_PASSWORD:-amaral_secret_2024}@postgres:5432/${POSTGRES_DB:-amaral_support}
       - CHAT_SIMULATOR_URL=http://chat-simulator:3001
       - WAHA_URL=http://waha:3000
       - N8N_AGENT_RESPONSE_URL=http://n8n:5678/webhook/agent-response

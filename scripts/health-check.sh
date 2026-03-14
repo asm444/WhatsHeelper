@@ -1,5 +1,5 @@
 #!/bin/bash
-# Health check de todos os serviços - Amaral AllSuport
+# Health check de todos os serviços - Amaral Support
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -22,7 +22,7 @@ check_service() {
   fi
 }
 
-echo "=== Verificação de Saúde - Amaral AllSuport ==="
+echo "=== Verificação de Saúde - Amaral Support ==="
 echo ""
 
 echo "[Serviços Customizados]"
